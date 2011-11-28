@@ -1,0 +1,162 @@
+\documentclass{article}
+%\VignetteIndexEntry{AffyRNADegradation Example}
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage[tableposition=top]{caption}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+\usepackage{enumerate}
+\usepackage{hyperref}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+
+\begin{document}
+
+\title{The AffyRNADegradation Package}
+\author{Mario Fasold}
+\maketitle
+
+Affymetrix 3' expression arrays employ a specific experimental
+protocol and a specific probe design that allows assessment of RNA integrity
+based on probe signal data. Problems of RNA integrity are primarily
+governed to the degradation of the target transcripts. It can be shown
+that
+%\begin{enumerate}
+\begin{enumerate}[(i)]%for capital roman numbers.
+\item degradation leads to a probe positional bias that needs to be
+  corrected in order to compare expression of samples with varying
+  degree of degradation, and
+\item it is possible to estimate a robust and accurate measure of RNA
+  integrity from the probe signals that, for example, can be used to study
+  degradation within the large number of available microarray data.
+\end{enumerate}
+The rationale and further analysis are described in the accompanying
+publication by Fasold and Binder. We here show how to utilize this
+package for both problems.
+
+\section{Basic RNA Degradation Analysis}
+
+We here show how to use the package for the analysis of RNA
+degradation. Let us first load exemplar data provided by the
+\Rpackage{AmpAffyExample} package into the environment.
+<<>>=
+library(AffyRNADegradation)
+library(AmpAffyExample)
+data(AmpData)
+AmpData
+@
+ 
+Every transcript is measured by a set of 11-16 probes. The log-average
+intensity difference between probes located closer to the 3' end of
+the target transcripts and those located further away constitutes the 
+probe positional bias. It can be visualized using the {\it tongs plot}.
+<<label=plotTongs,include=FALSE>>=
+tongs <- GetTongs(AmpData, chip.idx = 4) 
+PlotTongs(tongs)
+@
+\begin{figure}
+\begin{center}
+<<label=plotTongs,fig=TRUE,echo=FALSE>>=
+<<plotTongs>>
+@
+\end{center}
+\caption{The tongs plot shows that the intensity difference between 3'
+  and 5' probes increases with $\Sigma=\langle \log I
+  \rangle$. $\langle \rangle$ here denotes either averaging over all probes within
+  the probeset, or averaging over the 3' or 5' subset of probes in $\Sigma_{subset}$.}
+\label{fig:tongs}
+\end{figure}
+Figure~\ref{fig:tongs} shows that the bias relates to the expression
+level of the transcripts. As this can vary from sample to sample,
+it must be considered in estimating of RNA degradation. 
+
+The function \Rfunction{RNADegradation} performs the basal analysis of RNA
+degradation based on raw probe intensities stored in an AffyBatch
+object. The result is an \Robject{AffyDegradationBatch} object that contains the
+corrected probe intensities as well as several statistical parameters.
+<<correctAffy>>=
+rna.deg <- RNADegradation(AmpData, location.type = "index")
+@
+
+We can visualize the probe positional bias using the \Rfunction{PlotDx} function.
+<<label=plotDx,include=FALSE>>=
+plotDx(rna.deg)
+@
+\begin{figure}
+\begin{center}
+<<label=fig1,fig=TRUE,echo=FALSE>>=
+<<plotDx>>
+@
+\end{center}
+\caption{Probe degradation plot. The points show the average probe
+  intensity of expressed genes for each index $x=1,..11$ relative to
+  the average intensity at position $x=1$. The lines are a
+  fitted decay function.}
+\label{fig:one}
+\end{figure}
+Figure~\ref{fig:one} shows the results. Different degradation
+between different samples are observed. 
+
+To access the parameter $d$, which provides a robust, sample-wise measure for the
+degree of RNA degradation, one can use the function
+<<RnaIntegrityD>>=
+d(rna.deg)
+@
+
+\section{Absolute Probe Locations}
+
+Instead of using the probe index within the probeset as argument of
+the degradation degree, one can use the actual probe locations within
+the transcript. We have pre-computed the distance of each probe to the
+3' end of its target transcript for all Affymetrix 3' expression
+arrays. These probe location files are available under the URL
+\url{http://www.izbi.uni-leipzig.de/downloads_links/programs/rna_integrity.php}.
+
+In order to perform the analysis and correction using absolute
+probe locations, one must first download the probe location file for
+the used chip type. You can then start the analysis using
+\Rfunction{RNADegradation}, as above, but selecting
+\texttt{absolute} as \texttt{location.type}.  The parameter
+\texttt{location.file.dir} must specify the download directory of the
+probe location file. 
+
+% <<correctAffyAbsolute, results=hide, eval=FALSE>>=
+% # do not run as additional file needed
+% rna.deg = RNADegradation(AmpData, location.type = "absolute", location.file.dir = "[SOME_DIR]")
+% @ 
+
+\section{Correction of the Bias and Integration into the Microarray Calibration Process}
+
+The correction of the probe positional bias is performed within the
+\Rfunction{Affy\-RNA\-Degradation} function. The result is a new
+\Robject{AffyBatch} object with corrected probe level intensities. It
+can be accessed using the \Rfunction{afbatch} function
+<<correctAffy, results=hide>>=
+afbatch(rna.deg)
+@ 
+It is possible to replace the original raw data with this data
+corrected for probe positional bias, before performing further
+microarray normalization and summarization (e.g. using RMA).
+
+Alternatively, correction can be performed after probe-level
+normalization in a microarray calibration pipeline. The following
+example shows how to first apply the VSN normalization method, then
+correct for probe positional bias to finally get summarized expression
+measures
+<<vsnCorrect, results=hide, eval = FALSE>>=
+library(vsn)
+affydata.vsn <- do.call(affy:::normalize, c(alist(AmpData, "vsn"), NULL))
+affydata.vsn <- afbatch(RNADegradation(affydata.vsn))
+expr <- computeExprSet(affydata.vsn, summary.method="medianpolish", pmcorrect.method="pmonly")
+@
+
+\section{Details}
+This document was written using:
+
+<<details>>=
+sessionInfo()
+@
+
+\end{document}

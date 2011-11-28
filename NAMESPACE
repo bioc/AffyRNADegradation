@@ -1,0 +1,14 @@
+import(affy)
+
+export(RNADegradation,
+       PlotTongs,
+       GetTongs
+       )
+
+exportClasses("AffyDegradationBatch")
+
+exportMethods(plotDx,
+              d,
+              afbatch
+              )
+
