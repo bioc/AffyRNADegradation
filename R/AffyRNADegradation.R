@@ -31,8 +31,8 @@ RNADegradation <- function(affyData,
 
   ## Set up statistcs table  
   stats.all <- data.frame(d.inf = rep(0, length(affyData)),  lambda.inv  = 0,  shift.y  = 0,
-                          tongs.max.raw = 0, tongs.max.fit = 0,
-                          ns.threshold = 0, hook.max.sigma = 0, placeholder = 0, decay = 0,
+                          tongs.max.raw = 0, tongs.max.fit = 0, hook.max.sigma = 0, 
+                          ns.threshold = 0, placeholder = 0, decay = 0,
                           row.names = sampleNames(affyData))
   means.pm.all <- matrix(0, n.breaks, length(affyData), dimnames = list(x.center = positions, sample = sampleNames(affyData)))
   means.mm.all <- matrix(0, n.breaks, length(affyData), dimnames = list(x.center = positions, sample = sampleNames(affyData)))

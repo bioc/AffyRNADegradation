@@ -55,19 +55,23 @@ EstimateHookParams <- function(tongs) {
   tongs.loess <- loess(hook ~ sigma, tongs, span=2/3)
   
   hook.params <- list()
-  hook.params$max.raw <- max(tongs$hook) # tongsParamRaw
-  hook.params$max.fit <- max(tongs.loess$fit) # tongsParamFit
+  hook.params$max.raw <- max(tongs$hook) 
+  hook.params$max.fit <- max(tongs.loess$fit)                                        
 
   tongs$hook <- tongs.loess$fit / max(tongs.loess$fit)
   tongs$hook <- pmax(tongs$hook, 0) # forbid negatives
 
-  ## Estimate non-specific threshold as maximum sigma where (smoothed) hook is smaller than 0.02
-  hook.params$ns.threshold <- max(tongs$sigma[ tongs.loess$fit < 0.02 & tongs$sigma < hook.params$hook.max.sigma])
-  
   hook.params$hook.max.sigma <- tongs[min(which(tongs$hook == max(tongs$hook))),"sigma"]
 
-  ## Alternate estimate 
-  hook.params$ns.threshold2 <- quantile(tongs$sigma, 0.30) # consider 30% smallest EMs as non-specific
+  ## Estimate non-specific threshold as maximum sigma where (smoothed) hook is smaller than 0.02
+  hook.params$ns.threshold <- max(tongs$sigma[ tongs.loess$fit < 0.02 & tongs$sigma < hook.params$hook.max.sigma])
+
+  ## Alternate estimate: simply consider 30% smallest EMs as non-specific
+  hook.params$ns.threshold2 <- quantile(tongs$sigma, 0.30) 
+
+  # Make sure ns.threshold parameter is available
+  if (is.nan(hook.params$ns.threshold) || is.infinite(hook.params$ns.threshold))
+    hook.params$ns.threshold <- hook.params$ns.threshold2
 
   return(hook.params)
 }
