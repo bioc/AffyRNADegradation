@@ -4,22 +4,25 @@
 
 \alias{GetTongs}
 \alias{PlotTongs}
+\alias{PlotDegradationHooks}
 
 \title{Generate and visualize the tongs plot}
 
-\description{The tongs plot shows the relationship between expression
-  level and probe location bias. It is required for the correct estimation
-  of RNA degradation effects.}
+\description{The tongs plot and the related degradation hook show the
+  relationship between expression level and probe location bias.  They
+  are required for the correct estimation of RNA degradation effects. }
 
 \usage{
 GetTongs(affyData, chip.idx = 1)
 PlotTongs(tongs)
+PlotDegradationHooks(affyData, ...)
 }
                             
 \arguments{
   \item{affyData}{ an \code{AffyBatch} object.}
   \item{chip.idx}{ index of the sample to compute the tongs for.}
   \item{tongs}{ the tongs plot data table.}
+  \item{...}{ optional graphical parameters.}
 }
 
 \value{
@@ -36,6 +39,8 @@ if (require(AmpAffyExample)) {
 
   tongs <- GetTongs(AmpData, chip.idx = 4)
   PlotTongs(tongs)
+
+  PlotDegradationHooks(AmpData[,c(3,4)])
 }
 }
 

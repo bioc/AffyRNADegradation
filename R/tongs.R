@@ -45,6 +45,8 @@ ComputeTongs <- function(x, intensity, sigma, probeset.id, min.x = 1, max.x = 11
   tongs <- tongs[order(tongs$sigma),]
   tongs[,"p5.tongs"] <- filter(tongs[,"p5.i"] - tongs[,"average.i"], rep(1/mvg.avg.size,mvg.avg.size))
   tongs[,"p3.tongs"] <- filter(tongs[,"p3.i"] - tongs[,"average.i"], rep(1/mvg.avg.size,mvg.avg.size))
+  tongs[,"hook2"] <- filter(tongs[,"p3.i"] - tongs[,"p5.i"], rep(1/mvg.avg.size,mvg.avg.size))
+  
   tongs <- na.omit(tongs) # remove NA rows created by filter
   tongs[,"hook"] <- tongs[,"p3.tongs"] - tongs[,"p5.tongs"]
 
@@ -94,9 +96,24 @@ GetTongs <- function(affyData, chip.idx = 1) {
 PlotTongs <- function(tongs) {
  ymax <- 0.35
  ymin <- -0.35 
- plot(tongs[,"sigma"], tongs[,"p5.tongs"], type="l", ylim = c(ymin, ymax),
+ plot(tongs[,"sigma"], tongs[,"p5.tongs"], type="l", ylim=c(ymin, ymax),
       xlab=expression(Sigma), ylab=expression(Sigma[subset] - Sigma),
       main=paste("Tongs plot"), panel.first = grid())
  lines(tongs[,"sigma"], tongs[,"p3.tongs"], col=2)
  legend("topleft", c("5' subset", "3' subset"), fill=seq(1,2))
+}
+
+# Plot degradatio hook
+# (difficult to provide sensible defaults for axis limits)
+PlotDegradationHooks <- function(affyData, ...) {
+  colors = rainbow(length(affyData))
+  plot(0, xlim=c(1.4, 4.1), ylim=c(-0.03, 0.5), type="n", 
+       xlab=expression(Sigma), ylab=expression(Delta), ...)
+
+  # Compute and plot degradation hook separately for each sample
+  for (chip.idx in seq_along(affyData)) {
+    tongs <- GetTongs(affyData, chip.idx=chip.idx)
+    lines(tongs$sigma, tongs$hook, col=colors[chip.idx], lwd=2, ...)
+  }
+  legend("topleft", sampleNames(affyData), fill=colors, ...)
 }

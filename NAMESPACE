@@ -2,7 +2,8 @@ import(affy)
 
 export(RNADegradation,
        PlotTongs,
-       GetTongs
+       GetTongs,
+       PlotDegradationHooks
        )
 
 exportClasses("AffyDegradationBatch")
