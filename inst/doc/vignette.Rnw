@@ -105,7 +105,7 @@ degree of RNA degradation, one can use the function
 d(rna.deg)
 @
 
-\section{Absolute Probe Locations}
+\section{Using Absolute Probe Locations}
 
 Instead of using the probe index within the probeset as argument of
 the degradation degree, one can use the actual probe locations within
@@ -127,7 +127,73 @@ probe location file.
 % rna.deg = RNADegradation(AmpData, location.type = "absolute", location.file.dir = "[SOME_DIR]")
 % @ 
 
-\section{Correction of the Bias and Integration into the Microarray Calibration Process}
+\section{Creating Custom Probe Location Files}
+
+It is possible to use custom probe locations, for example if one
+wishes to analyze custom built microarrays or if one relies on
+alternative probe annotations. For this, one has to create a probe
+location file similar to the pre-built ones used in the previous section.
+
+Here is how to generate such a file. First, create a data frame with
+the name \texttt{probeDists} containing the five columns
+\texttt{Probe.Set.Name}, \texttt{Probe.X}, \texttt{Probe.Y},
+\texttt{Probe.Distance} and
+\texttt{Target.Length}. \texttt{Probe.Set.Name} is of class character
+and contains the Affymetrix probe set id. The remaining variables are
+of class integer. 
+
+\texttt{Probe.X} and \texttt{Probe.Y} denote the
+coordinates of the probe on the microarray. These are important because
+the coordinates are used to map the probes to the AffyBatch object
+using the \Rfunction{xy2indices} function from the \Rpackage{affy}
+package. This implies that the ordering of the table rows can be of
+any kind. It is however important that this information can be mapped
+to every probe pair in the AffyBatch intensity array (as for example shown
+in the \Rfunction{affy::pm} function). 
+
+\texttt{Probe.Distance} contains the
+probe location: the number of nucleotides counted between the
+designated 3’-end of the transcript and the first (i.e. nearest) base
+of the 25meric probe sequence. The last column \texttt{Target.Length}
+contains the length of the target in base bairs - it is not used in
+this package and can be set to any value. The following table
+shows an example of the \texttt{probeDists} data frame:
+
+% latex table generated in R 2.15.0 by xtable 1.7-0 package
+% Wed Sep 26 15:05:00 2012
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{rlrrrr}
+  \hline
+ & Probe.Set.Name & Probe.X & Probe.Y & Probe.Distance & Target.Length \\ 
+  \hline
+1 & 1007\_s\_at & 467 & 181 & 608 & 3938 \\ 
+  2 & 1007\_s\_at & 531 & 299 & 495 & 3938 \\ 
+  3 & 1007\_s\_at &  86 & 557 & 426 & 3938 \\ 
+  ...  & ... &  ... & ... & ... & .. \\ 
+   \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+This table is then stored in an R binary object file. The
+filename must be set to the chip type identifier as given by the
+\Rfunction{affy::cdfName} function with the file ending \texttt{.Rd}:
+
+<<saveProbeLocations, results=hide, eval=FALSE>>=
+filename = paste(cdfName(AmpData), ".Rd", sep="")
+save(probeDists, file = filename)
+@ 
+
+To use the custom probe locations, start the analysis using
+\Rfunction{RNADegradation}, as above with
+\texttt{location.type=absolute} and \texttt{location.file.dir} set to
+the directory containing the custom probe location file.
+
+
+
+
+\section{Correction of the Bias and Integration into the Microarray Calibration Pipeline}
 
 The correction of the probe positional bias is performed within the
 \Rfunction{Affy\-RNA\-Degradation} function. The result is a new
@@ -140,11 +206,10 @@ It is possible to replace the original raw data with this data
 corrected for probe positional bias, before performing further
 microarray normalization and summarization (e.g. using RMA).
 
-Alternatively, correction can be performed after probe-level
-normalization in a microarray calibration pipeline. The following
-example shows how to first apply the VSN normalization method, then
-correct for probe positional bias to finally get summarized expression
-measures
+Alternatively, the correction can be performed after probe-level
+normalization. The following example shows how to first apply the VSN
+normalization method, then correct for probe positional bias to
+finally get summarized expression measures
 <<vsnCorrect, results=hide, eval = FALSE>>=
 library(vsn)
 affydata.vsn <- do.call(affy:::normalize, c(alist(AmpData, "vsn"), NULL))
