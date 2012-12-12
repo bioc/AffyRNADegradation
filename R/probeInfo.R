@@ -2,8 +2,14 @@
 getProbeInfo.index <- function(affyData) {
   probeset.id <- probeNames(affyData)
 
-  # for each set, probe are indexed in reverse order of occurence in intensity matrix
-  probe.index <- ave(seq(length(probeset.id), 1, -1), probeset.id, FUN=rank)
+  ## For each set, probe are indexed in reverse order of their
+  ## occurence in the intensity matrix
+  ## exception: different ordering for PrimeView CDFs
+  if (cdfName(affyData) != "PrimeView") {
+    probe.index <- ave(seq(length(probeset.id), 1, -1), probeset.id, FUN=rank)
+  } else {
+    probe.index <- ave(seq(1, length(probeset.id),  1), probeset.id, FUN=rank)
+  }
 
   return(data.frame(probeset.id = probeset.id, x = probe.index, stringsAsFactors=F))
 }

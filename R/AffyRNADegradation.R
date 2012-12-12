@@ -72,8 +72,15 @@ RNADegradation <- function(affyData,
     average.scaling.in.specific <- mean(scale.f.y[h.max - 0.4 < tongs$sigma & tongs$sigma < h.max + 0.2])
     scale.f.y <- scale.f.y / average.scaling.in.specific
 
-    ## Separately correct pm and mm
-    for(probe.type in c("mm","pm")) { # mm before pm, to avoid using previously corrected pm values
+    ## Special handling for PrimeView arrays which do not contain mismatch probes
+    if (cdfName(affyData) == "PrimeView") {
+      probe.types <- c("pm")      
+    } else {
+      probe.types <- c("mm","pm")
+    }
+
+    ## Separately correct pm and mm      
+    for(probe.type in probe.types) { # mm before pm, to avoid using previously corrected pm values
 
       ## Assign PM or MM accessor functions, for convenience
       if (probe.type == "pm") {
