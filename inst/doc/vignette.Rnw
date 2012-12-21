@@ -7,6 +7,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{enumerate}
 \usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
 
 \newcommand{\Rfunction}[1]{{\texttt{#1}}}
 \newcommand{\Robject}[1]{{\texttt{#1}}}
@@ -21,8 +22,8 @@
 Affymetrix 3' expression arrays employ a specific experimental
 protocol and a specific probe design that allows assessment of RNA integrity
 based on probe signal data. Problems of RNA integrity are primarily
-governed to the degradation of the target transcripts. It can be shown
-that
+governed to the degradation of the target transcripts. We have shown
+in \cite{Fasold2012a} that 
 %\begin{enumerate}
 \begin{enumerate}[(i)]%for capital roman numbers.
 \item degradation leads to a probe positional bias that needs to be
@@ -217,11 +218,18 @@ affydata.vsn <- afbatch(RNADegradation(affydata.vsn))
 expr <- computeExprSet(affydata.vsn, summary.method="medianpolish", pmcorrect.method="pmonly")
 @
 
+\section{Citing AffyRNADegradation}
+Please cite \citep{Fasold2012b} when using the package.
+
+
 \section{Details}
 This document was written using:
 
 <<details>>=
 sessionInfo()
 @
+
+\bibliographystyle{plainnat}
+\bibliography{AffyRNADegradation}
 
 \end{document}
