@@ -2,10 +2,10 @@ Package: AffyRNADegradation
 Type: Package
 Title: Analyze and correct probe positional bias in microarray data due
         to RNA degradation
-Version: 1.47.0
-Date: 2012-09-26
+Version: 1.47.1
+Date: 2023-10-17
 Depends: R (>= 2.9.0), methods, affy
-Suggests: AmpAffyExample
+Suggests: AmpAffyExample, hgu133acdf
 Author: Mario Fasold
 Maintainer: Mario Fasold <fasold@izbi.uni-leipzig.de>
 Description: The package helps with the assessment and correction of
